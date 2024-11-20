@@ -587,16 +587,41 @@ function updatePrice() {
 // Initialize the counter outside of the function
 let incrementCounter = 1;  // Starting point (this will increment with each new Weborder)
 
-	function handleSubmit(leadTime) {
-  // Existing code to generate the PDF...
-  
+function handleSubmit(leadTime) {
+  const boardName = document.getElementById("boardName").value.trim();
+  const userMobile = document.getElementById("userMobile").value.trim();
+  const userEmail = document.getElementById("userEmail").value.trim();
+  const length = parseFloat(document.getElementById("length").value) || 0;
+  const width = parseFloat(document.getElementById("width").value) || 0;
+  const quantity = parseInt(document.getElementById("quantity").value) || 1;
+  const solderMask = document.getElementById("solderMask").value;
+  const finish = document.getElementById("finish").value;
+  const copperWeight = document.getElementById("copperWeight").value; 
+  const remarks = document.getElementById("remarks").value.trim(); 
+
+  // Prepare the PDF content
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text(`Board Name: ${boardName}`, 10, 10);
+  doc.text(`Mobile: ${userMobile}`, 10, 20);
+  doc.text(`Email: ${userEmail}`, 10, 30);
+  doc.text(`PCB Size: ${length} x ${width} mm`, 10, 40);
+  doc.text(`Quantity: ${quantity}`, 10, 50);
+  doc.text(`Solder Mask: ${solderMask}`, 10, 60);
+  doc.text(`Surface Finish: ${finish}`, 10, 70);
+  doc.text(`Copper Weight: ${copperWeight}`, 10, 80);
+  doc.text(`Lead Time: ${leadTime}`, 10, 90);
+  doc.text(`Remarks: ${remarks}`, 10, 100);
+  doc.save(`${boardName}_PCB_Order.pdf`);
+
   // Prepare the data to send to the backend
   const formData = new FormData();
-  formData.append('pdfData', doc.output('datauristring').split(',')[1]); // Add PDF data as base64
+  formData.append('pdfData', doc.output('datauristring').split(',')[1]); 
   formData.append('boardName', boardName);
   formData.append('userMobile', userMobile);
   formData.append('userEmail', userEmail);
   formData.append('leadTime', leadTime);
+  formData.append('remarks', remarks);
 
   // Append uploaded files
   const files = fileInput.files;
