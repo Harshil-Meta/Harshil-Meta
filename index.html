@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PCB Price Calculator</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #pcb-calculator {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      background: linear-gradient(to bottom right, #ffffff, #eaf7fc);
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      gap: 30px;
+    }
+    .input-form {
+      flex: 1;
+      min-width: 320px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .calculation-table {
+      flex: 1;
+      min-width: 320px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2, h3 {
+      text-align: center;
+      color: #4CAF50;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    h3 {
+      font-size: 1.2rem;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin: 8px 0;
+      background-color: #f9f9f9;
+      font-size: 1rem;
+      transition: border 0.3s ease;
+    }
+    input:focus, select:focus {
+      border: 1px solid #4CAF50;
+      background-color: #fff;
+    }
+    .input-form div {
+      margin-bottom: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      color: #333;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .results p {
+      margin-top: 10px;
+      color: #555;
+    }
+    .results p b {
+      color: #333;
+    }
+    .btn-calculate {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-calculate:hover {
+      background-color: #45a049;
+    }
+    .btn-submit {
+     padding: 8px 16px;
+     background-color: #4CAF50;
+     color: white;
+     border: none;
+     border-radius: 8px;
+     cursor: pointer;
+     font-size: 0.9rem;
+     transition: background-color 0.3s ease;
+       }
+    .file-upload {
+      margin-top: auto;
+      text-align: center;
+    }
+    
+    .drop-area {
+      border: 2px dashed #4CAF50;
+      padding: 30px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      cursor: pointer;
+    }
+    
+    .drop-area p {
+      margin: 0;
+      font-size: 1rem;
+      color: #4CAF50;
+    }
+    
+    .upload-label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .drop-area:hover {
+      background-color: #eaf7fc;
+    }
+    
+    #fileList {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #555;
+    }
+
+
+
+
+.btn-submit:hover {
+  background-color: #45a049;
+}
+
+    /* Media Query for smaller screens */
+    @media (max-width: 768px) {
+      #pcb-calculator {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="pcb-calculator">
+    <!-- Left Side: Input Form -->
+    <div class="input-form">
+      <h2>PCB Price Calculator</h2>
+  <!-- User Information Fields -->
+    <div>
+      <label for="boardName"><b>Board Name:</b></label>
+      <input type="text" id="boardName" placeholder="Enter Board Name">
+    </div>
+    <div>
+      <label for="userMobile"><b>Mobile:</b></label>
+      <input type="tel" id="userMobile" placeholder="Enter Mobile Number" pattern="[0-9]{10}">
+    </div>
+    <div>
+      <label for="userEmail"><b>Email Address:</b></label>
+      <input type="email" id="userEmail" placeholder="Enter Email Address">
+    </div>
+
+      <!-- Board Size -->
+      <div>
+        <label for="length"><b>Board Size (mm):</b></label>
+        <div style="display: flex; justify-content: space-between;">
+          <input type="number" id="length" placeholder="Length" oninput="updatePrice()" min="1">
+          <span style="align-self: center;">×</span>
+          <input type="number" id="width" placeholder="Width" oninput="updatePrice()" min="1">
+        </div>
+      </div>
+
+      <!-- Quantity -->
+      <div>
+        <label for="quantity"><b>Quantity:</b></label>
+        <input type="number" id="quantity" placeholder="Quantity" oninput="updatePrice()" min="1" value="1">
+      </div>
+
+      <!-- Layers and Material in same row -->
+  <div style="display: flex; gap: 20px;">
+    <div style="flex: 1;">
+      <label for="layers"><b>Layers:</b></label>
+      <select id="layers" onchange="updatePrice()">
+        <option value="1">1 Layer</option>
+        <option value="2">2 Layers</option>
+      </select>
+    </div>
+    <div style="flex: 1;">
+      <label for="material"><b>Material:</b></label>
+      <select id="material" onchange="updatePrice()">
+        <option value="FR4">FR-4</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Thickness, Solder Mask in same row -->
+  <div style="display: flex; gap: 20px;">
+    <div style="flex: 1;">
+      <label for="thickness"><b>Thickness (mm):</b></label>
+      <select id="thickness" onchange="updatePrice()">
+        <option value="1.6">1.6 mm</option>
+        <option value="0.6">0.6 mm</option>
+        <option value="0.8">0.8 mm</option>
+        <option value="1.0">1.0 mm</option>
+        <option value="1.2">1.2 mm</option>
+      </select>
+    </div>
+    <div style="flex: 1;">
+      <label for="solderMask"><b>Solder Mask:</b></label>
+      <select id="solderMask" onchange="updatePrice()">
+        <option value="Green">Green</option>
+        <option value="Red">Red</option>
+        <option value="Blue">Blue</option>
+        <option value="Black">Black</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Surface Finish and Copper Weight in same row -->
+  <div style="display: flex; gap: 20px;">
+    <div style="flex: 1;">
+      <label for="finish"><b>Surface Finish:</b></label>
+      <select id="finish" onchange="updatePrice()">
+        <option value="HASL(Leaded)">HASL(Leaded)</option>
+        <option value="Roller Tin">Roller Tin</option>
+      </select>
+    </div>
+    <div style="flex: 1;">
+      <label for="copperWeight"><b>Copper Weight:</b></label>
+      <select id="copperWeight" onchange="updatePrice()">
+        <option value="1oz">1 oz</option>
+        <option value="2oz">2 oz</option>
+      </select>
+    </div>
+  </div>
+        <!-- Remarks Section -->
+    <div>
+      <label for="remarks"><b>Remarks:</b></label>
+      <input type="text" id="remarks" placeholder="Enter Remarks">
+    </div>
+      <!-- File Upload -->
+      <!-- Drag and Drop File Upload for Multiple Files -->
+        <div class="file-upload" id="dragAndDropArea">
+          <label for="fileUpload" class="upload-label"><b>Upload Files</b></label>
+          <div class="drop-area" id="dropArea">
+            <p>Drag & Drop your files here or click to select files</p>
+            <input type="file" id="fileUpload" multiple style="display:none;" />
+          </div>
+          <div id="fileList"></div> <!-- Display list of uploaded file names -->
+        </div>
+    </div>
+
+    <!-- Right Side: Calculation Table -->
+    <div class="calculation-table">
+      <h3>Calculation</h3>
+      <table id="calculationTable">
+        <thead>
+  <tr>
+    <th>Lead Time</th>
+    <th>Unit Price</th>
+    <th>Order Value</th>
+    <th>Action</th> <!-- New column for the button -->
+  </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1 Day</td>
+            <td>₹0.00</td>
+            <td>₹0.00</td>
+            <td><button class="btn-submit" onclick="handleSubmit(1)">Submit</button></td> <!-- Submit button -->
+          </tr>
+          <tr>
+            <td>3 Days</td>
+            <td>₹0.00</td>
+            <td>₹0.00</td>
+            <td><button class="btn-submit" onclick="handleSubmit(3)">Submit</button></td>
+          </tr>
+          <tr>
+            <td>5 Days</td>
+            <td>₹0.00</td>
+            <td>₹0.00</td>
+            <td><button class="btn-submit" onclick="handleSubmit(5)">Submit</button></td>
+          </tr>
+          <tr>
+            <td>7 Days</td>
+            <td>₹0.00</td>
+            <td>₹0.00</td>
+            <td><button class="btn-submit" onclick="handleSubmit(7)">Submit</button></td>
+          </tr>
+          <tr>
+            <td>10 Days</td>
+            <td>₹0.00</td>
+            <td>₹0.00</td>
+            <td><button class="btn-submit" onclick="handleSubmit(10)">Submit</button></td>
+          </tr>
+        </tbody>
+
+      </table>
+
+      <div class="results">
+        <p id="pcbSize"></p>
+        <p id="pcbQuantity"></p>
+        <p id="pcbVolume"></p>
+        <p>GST: <b>18% Extra</b></p>
+        <p>Setup Cost: <b>Free</b></p>
+        <p>Freight Cost: <b>Free</b></p>
+        <p>FPT Cost: <b>Free</b></p>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+function updatePrice() {
+  const length = parseFloat(document.getElementById("length").value) || 0;
+  const width = parseFloat(document.getElementById("width").value) || 0;
+  const layers = parseInt(document.getElementById("layers").value) || 0;
+  const quantity = parseInt(document.getElementById("quantity").value) || 1;
+
+  if (length <= 0 || width <= 0 || layers <= 0 || quantity <= 0) {
+    document.getElementById("calculationTable").querySelector("tbody").innerHTML =
+      "<tr><td colspan='4'>Please enter valid positive values for size, layers, and quantity.</td></tr>";
+    return;
+  }
+
+  const areaPerPCB = (length * width) / 100; // Convert mm² to cm²
+  const totalArea = areaPerPCB * quantity; // Total area for all PCBs
+
+  const leadTimes = [1, 3, 5, 7, 10];
+  const prices = leadTimes.map((leadTime) => {
+    const setupPrice = layers === 1
+      ? [3000, 2000, 1500, 1000, 750][leadTimes.indexOf(leadTime)]
+      : [8000, 4000, 2500, 1500, 1000][leadTimes.indexOf(leadTime)];
+
+    let orderValue = setupPrice + totalArea;
+    let unitPrice = orderValue / quantity;
+
+    return { leadTime: `${leadTime} Day(s)`, unitPrice, orderValue };
+  });
+
+  // Update Table with Submit Buttons
+  const tableBody = document.getElementById("calculationTable").querySelector("tbody");
+  tableBody.innerHTML = prices
+    .map(
+      (row) =>
+        `<tr>
+          <td>${row.leadTime}</td>
+          <td>₹${row.unitPrice.toFixed(2)}</td>
+          <td>₹${row.orderValue.toFixed(2)}</td>
+          <td><button class="btn-submit" onclick="handleSubmit('${row.leadTime}')">Submit</button></td>
+        </tr>`
+    )
+    .join("");
+
+  // Update PCB details
+  const pcbSizeElement = document.getElementById("pcbSize");
+  const pcbQuantityElement = document.getElementById("pcbQuantity");
+  const pcbVolumeElement = document.getElementById("pcbVolume");
+
+  pcbSizeElement.innerText = `PCB Size: ${length} x ${width} mm`;
+  pcbQuantityElement.innerText = `Quantity: ${quantity}`;
+  pcbVolumeElement.innerText = `Volume in sq. cm: ${totalArea.toFixed(2)}`;
+}
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileUpload');
+    const fileListElement = document.getElementById('fileList');
+    
+    // Prevent default behaviors for drag events
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.style.backgroundColor = '#eaf7fc';  // Optional: change color when dragging
+    });
+    
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.style.backgroundColor = '#f9f9f9';  // Reset color when leaving
+    });
+    
+    // Handle the drop event
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.style.backgroundColor = '#f9f9f9';  // Reset background color after drop
+    
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        uploadFiles(files);
+        fileInput.files = files;  // Assign dropped files to input element
+      }
+    });
+    
+    // Allow file selection by clicking on the drop area
+    dropArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    // Handle file selection through file input
+    fileInput.addEventListener('change', () => {
+      const files = fileInput.files;
+      if (files.length > 0) {
+        uploadFiles(files);
+      }
+    });
+    
+    // Function to display the names of selected files
+    // Function to display the names of selected files without clearing the list
+    function uploadFiles(files) {
+      Array.from(files).forEach((file) => {
+        // Create a new element for each file and append it
+        const fileElement = document.createElement('p');
+        fileElement.textContent = `File: ${file.name}`;
+        fileListElement.appendChild(fileElement);
+      });
+    }
+
+ 
+  
+ 
+  function handleSubmit(leadTime) {
+  const boardName = document.getElementById("boardName").value.trim();
+  const userMobile = document.getElementById("userMobile").value.trim();
+  const userEmail = document.getElementById("userEmail").value.trim();
+  const length = parseFloat(document.getElementById("length").value) || 0;
+  const width = parseFloat(document.getElementById("width").value) || 0;
+  const quantity = parseInt(document.getElementById("quantity").value) || 1;
+  const solderMask = document.getElementById("solderMask").value;
+  const finish = document.getElementById("finish").value;
+  const copperWeight = document.getElementById("copperWeight").value; 
+  const remarks = document.getElementById("remarks").value.trim(); // Capture Remarks
+
+  
+   let shortBoardName = boardName.substring(0, 3).toUpperCase(); // Extract first 3 characters and convert to uppercase
+
+    let lastIncrement = parseInt(localStorage.getItem('lastIncrement') || '0', 10);
+    lastIncrement++;
+    localStorage.setItem('lastIncrement', lastIncrement);
+
+    const webOrderId = `WEB#${shortBoardName}-${lastIncrement}`;
+    console.log(webOrderId); // Example: WEB#MYB-1
+
+
+
+
+
+  // Find the row for the selected lead time
+  const rows = document.querySelectorAll("#calculationTable tbody tr");
+  let unitPrice = 0;
+  let orderValue = 0;
+
+  rows.forEach(row => {
+    const leadTimeText = row.cells[0].textContent.trim();
+    if (leadTimeText.includes(leadTime)) {
+      unitPrice = parseFloat(row.cells[1].textContent.replace('₹', '').trim());
+      orderValue = parseFloat(row.cells[2].textContent.replace('₹', '').trim());
+    }
+  });
+
+
+
+  // Ensure unitPrice and orderValue always have 2 decimal places
+  const formattedUnitPrice = unitPrice.toFixed(2);
+  const formattedOrderValue = orderValue.toFixed(2);
+
+  // Prepare the data to include in the PDF
+  const pdfContent = `
+    WebOrder ID: ${webOrderId}
+    Board Name: ${boardName}
+    Mobile: ${userMobile}
+    Email: ${userEmail}
+    PCB Size: ${length} x ${width} mm
+    Quantity: ${quantity}
+    Solder Mask: ${solderMask}
+    Surface Finish: ${finish}
+    Copper Weight: ${copperWeight}
+    Lead Time: ${leadTime} 
+    Unit Price: ${formattedUnitPrice}
+    Order Value: ${formattedOrderValue}
+    Remarks: ${remarks}
+  `;
+
+  // Create a new jsPDF instance
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Add a background color
+  doc.setFillColor(240, 240, 240); // Light grey
+  doc.rect(0, 0, 210, 297, 'F'); // Full page rectangle
+ 
+  const logoUrl = "https://assets.zyrosite.com/AVLN8xZB8QuDoLxP/3d-png-AGBvazO0vkHWVbPD.png";
+  doc.addImage(logoUrl, 'PNG', 15, 10, 120, 40); // Positioning: x=15, y=10, width=40, height=40
+  
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'short' }); // Abbreviated month (e.g., "Dec")
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    
+    // Add suffix for day (st, nd, rd, th)
+    let suffix = 'th';
+    if (day === 1 || day === 21 || day === 31) suffix = 'st';
+    else if (day === 2 || day === 22) suffix = 'nd';
+    else if (day === 3 || day === 23) suffix = 'rd';
+    
+    // Combine date and time
+    const formattedDate = `Datestamp: ${day}${suffix} ${month} ${year} ${hours}:${minutes}:${seconds}`;
+    
+    // Add the formatted date and time to the PDF
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(50, 50, 50); // Dark grey
+    doc.setFontSize(15);
+    doc.text(formattedDate, 120, 60); // Positioning: x=15, y=60
+    
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(50, 50, 50); // Dark grey
+    doc.setFontSize(14);
+    doc.text(`WebOrder ID: ${webOrderId}`, 120, 53);
+    
+    
+  // Add title with a fancy font
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(50, 50, 50); // Dark grey
+  doc.setFontSize(22);
+  doc.text("PCB Order Confirmation", 15, 60);
+
+  // Add line under title
+  doc.setDrawColor(50, 50, 50);
+  doc.line(15, 62, 195, 62);
+
+  // Add content with a clean layout
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.setTextColor(100, 100, 100); // Lighter grey for the content
+
+  doc.text(`Board Name: ${boardName}`, 15, 70);
+  doc.text(`Mobile: ${userMobile}`, 15, 80);
+  doc.text(`Email: ${userEmail}`, 15, 90);
+  doc.text(`PCB Size: ${length} x ${width} mm`, 15, 100);
+  doc.text(`Quantity: ${quantity}`, 15, 110);
+  doc.text(`Solder Mask: ${solderMask}`, 15, 120);
+  doc.text(`Surface Finish: ${finish}`, 15, 130);
+  doc.text(`Copper Weight: ${copperWeight}`, 15, 140);
+  doc.text(`Lead Time: ${leadTime}`, 15, 150);
+  doc.text(`Unit Price: ${unitPrice} Rs`, 15, 160);
+  doc.text(`Order Value: ${orderValue} Rs`, 15, 170);
+
+  // Add a footer with a message
+  doc.setTextColor(150, 150, 150); // Light grey for footer
+  doc.setFontSize(10);
+  doc.text("Thank you for your order! For any inquiries, contact us at quote@megabytecircuit.com", 15, 285);
+
+  // Save the PDF with a fancy filename
+  doc.save(`PCB_Order_Confirmation_${boardName}.pdf`);
+
+  // Alert to confirm submission and PDF generation
+  alert(`Order Submitted!\n\nLead Time: ${leadTime}\nA fancier PDF has been generated.`);
+}
+// Initialize the counter outside of the function
+let incrementCounter = 1;  // Starting point (this will increment with each new Weborder)
+
+	function handleSubmit(leadTime) {
+  // Existing code to generate the PDF...
+  
+  // Prepare the data to send to the backend
+  const formData = new FormData();
+  formData.append('pdfData', doc.output('datauristring').split(',')[1]); // Add PDF data as base64
+  formData.append('boardName', boardName);
+  formData.append('userMobile', userMobile);
+  formData.append('userEmail', userEmail);
+  formData.append('leadTime', leadTime);
+
+  // Append uploaded files
+  const files = fileInput.files;
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]);
+  }
+
+  // Send the data to the backend
+  fetch('/send-email', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.text())
+  .then(result => {
+    alert(result);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+</script>
+
+</body>
+</html>
